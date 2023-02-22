@@ -341,6 +341,24 @@ def issue_exists(gitea_api: pygitea, owner: string, repo: string, issue: string)
         return False
 
 
+def create_stub_issues( gitea_api: pygitea, amount: int):
+    for stub_number in range(amount): 
+        import_response: requests.Response = gitea_api.post("/repos/" + owner + "/" + repo + "/issues", json={
+                "assignee": "",
+                "assignees": "",
+                "body": "",
+                "closed": issue.state == 'closed',
+                "due_on": "",
+                "labels": "",
+                "milestone": "",
+                "title": stub_number
+            })
+            if import_response.ok:
+                print_info("Empty Issue " + issue.title + " created!")
+            else:
+                print_error("Empty Issue " + issue.title + " creation failed: " + import_response.text)
+
+
 #
 # Import helper functions
 #
@@ -396,6 +414,8 @@ def _import_project_issues(gitea_api: pygitea, issues: [gitlab.v4.objects.Projec
     # reload all existing milestones and labels, needed for assignment in issues
     existing_milestones = get_milestones(gitea_api, owner, repo)
     existing_labels = get_labels(gitea_api, owner, repo)
+
+    create_stub_issues(gitea_api, issues.length)
 
     for issue in issues:
         if not issue_exists(gitea_api, owner, repo, issue.title):
